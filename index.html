@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>-L3/S1- منصة المراجعة الذكية العلوم التجارية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0A0E17;
+            --bg2: #0F1525;
+            --card: #131A2B;
+            --card-hover: #1A2340;
+            --accent: #C9A84C;
+            --accent-light: #E8D48B;
+            --accent-dim: rgba(201,168,76,0.15);
+            --success: #34D399;
+            --error: #F87171;
+            --text: #E8E0D4;
+            --text-muted: #7A869E;
+            --border: #1E2A45;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg2); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .bg-noise {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        .glow-orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .subject-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; left: 0;
+            height: 3px;
+            background: var(--card-color);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s ease;
+        }
+        .subject-card:hover::before { transform: scaleX(1); }
+        .subject-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-color);
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5), 0 0 30px -10px var(--card-color-dim);
+        }
+
+        .mode-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--text-muted);
+            background: transparent;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .mode-tab:hover { color: var(--text); background: var(--card); }
+        .mode-tab.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+            border-color: rgba(201,168,76,0.3);
+        }
+
+        .accordion-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .accordion-item.open { border-color: rgba(201,168,76,0.3); }
+        .accordion-header {
+            padding: 18px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: background 0.3s;
+            user-select: none;
+        }
+        .accordion-header:hover { background: var(--card-hover); }
+        .accordion-header .chevron {
+            transition: transform 0.3s;
+            margin-right: auto;
+            color: var(--text-muted);
+        }
+        .accordion-item.open .chevron { transform: rotate(180deg); color: var(--accent); }
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .accordion-item.open .accordion-body { max-height: 2000px; }
+        .accordion-content { padding: 0 20px 20px 20px; line-height: 2; color: #c4bdb2; }
+        .accordion-content .key-term {
+            color: var(--accent);
+            font-weight: 700;
+            background: var(--accent-dim);
+            padding: 1px 8px;
+            border-radius: 4px;
+            display: inline;
+        }
+        .accordion-content .sub-point {
+            padding-right: 20px;
+            position: relative;
+            margin-bottom: 6px;
+        }
+        .accordion-content .sub-point::before {
+            content: '';
+            position: absolute;
+            right: 4px;
+            top: 12px;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.6;
+        }
+
+        /* بطاقات تعليمية */
+        .flashcard-container {
+            perspective: 1200px;
+            width: 100%;
+            max-width: 640px;
+            height: 380px;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            width: 100%; height: 100%;
+            position: relative;
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+        }
+        .flashcard-inner.flipped { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute; inset: 0;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 36px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--card) 0%, #1a2235 100%);
+        }
+        .flashcard-back {
+            background: linear-gradient(135deg, #1a2235 0%, var(--card) 100%);
+            transform: rotateY(180deg);
+            border-color: rgba(201,168,76,0.3);
+        }
+
+        .confidence-btn {
+            padding: 12px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            border: 2px solid;
+            transition: all 0.3s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .confidence-btn:hover { transform: translateY(-2px); }
+        .conf-btn-hard { color: var(--error); border-color: var(--error); background: rgba(248,113,113,0.1); }
+        .conf-btn-hard:hover { background: rgba(248,113,113,0.2); }
+        .conf-btn-medium { color: #FBBF24; border-color: #FBBF24; background: rgba(251,191,36,0.1); }
+        .conf-btn-medium:hover { background: rgba(251,191,36,0.2); }
+        .conf-btn-easy { color: var(--success); border-color: var(--success); background: rgba(52,211,153,0.1); }
+        .conf-btn-easy:hover { background: rgba(52,211,153,0.2); }
+
+        /* اختبار */
+        .quiz-option {
+            width: 100%;
+            padding: 18px 22px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--card);
+            cursor: pointer;
+            text-align: right;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text);
+            transition: all 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(52,211,153,0.15) !important;
+            animation: correctPulse 0.5s ease;
+        }
+        .quiz-option.wrong {
+            border-color: var(--error) !important;
+            background: rgba(248,113,113,0.15) !important;
+            animation: wrongShake 0.5s ease;
+        }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.6; }
+        .quiz-option.disabled.correct { opacity: 1; }
+        .quiz-option .opt-letter {
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            background: var(--bg2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .quiz-option:hover:not(.disabled) .opt-letter {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .quiz-option.correct .opt-letter { background: var(--success); color: #fff; }
+        .quiz-option.wrong .opt-letter { background: var(--error); color: #fff; }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .progress-ring { transition: stroke-dashoffset 1s ease; }
+
+        .glossary-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            transition: all 0.3s;
+        }
+        .glossary-item:hover {
+            border-color: rgba(201,168,76,0.3);
+            background: var(--card-hover);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast-success { background: rgba(52,211,153,0.2); border: 1px solid var(--success); color: var(--success); }
+        .toast-error { background: rgba(248,113,113,0.2); border: 1px solid var(--error); color: var(--error); }
+        .toast-info { background: rgba(201,168,76,0.2); border: 1px solid var(--accent); color: var(--accent); }
+
+        .search-input {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 18px 12px 44px;
+            color: var(--text);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            width: 100%;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--text-muted); }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-read-btn {
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .section-read-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .section-read-btn.read { background: rgba(52,211,153,0.15); border-color: var(--success); color: var(--success); }
+
+        @media (max-width: 768px) {
+            .flashcard-container { height: 300px; }
+            .flashcard-front, .flashcard-back { padding: 24px 20px; }
+            .mode-tabs-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-noise"></div>
+    <div class="glow-orb" style="width:500px;height:500px;background:rgba(201,168,76,0.04);top:-200px;right:-100px;"></div>
+    <div class="glow-orb" style="width:400px;height:400px;background:rgba(45,212,191,0.03);bottom:-150px;left:-100px;animation-delay:-7s;"></div>
+
+    <div id="app" style="position:relative;z-index:1;"></div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+    // ============ بيانات المقررات ============
+    const subjects = [
+    {
+        id: 'financial-markets',
+        title: 'الأسواق المالية وتنظيمها',
+        icon: 'fa-chart-line',
+        color: '#C9A84C',
+        colorDim: 'rgba(201,168,76,0.15)',
+        desc: 'هيكل النظام المالي، الأسواق الدولية، التنظيم والرقابة، كفاءة السوق، ودراسة حالة بورصة الجزائر',
+        sections: [
+            {
+                title: 'الإطار المفاهيمي والوظيفي للنظام المالي',
+                points: [
+                    '<span class="key-term">النظام المالي</span> يُعرّف أكاديمياً بأنه الإطار المؤسسي والقانوني الذي يسمح بانتقال رؤوس الأموال من وحدات الفائض (المدخرين/المقرضين) إلى وحدات العجز (المستثمرين/المقترضين) عبر وسطاء ماليين بهدف توظيف المدخرات بكفاءة',
+                    '<span class="key-term">وظائف النظام المالي</span>: تجميع المدخرات، توفير السيولة (تحويل الأصول غير السائلة إلى نقد)، توزيع المخاطر عبر تنويع المحافظ المالية',
+                    'يلعب النظام المالي دوراً حيوياً في تحقيق التنمية الاقتصادية الكلية'
+                ],
+                extra: '<strong>أثر العولمة المالية:</strong> أدى التحرير المالي والتطور التكنولوجي إلى دمج الأسواق الوطنية في سوق عالمية واحدة. <br><strong>الإيجابيات:</strong> ظهور البنوك الشاملة وتكامل الأسواق. <br><strong>السلبيات:</strong> إفراز مخاطر خطيرة مثل "العدوى المالية" (انتقال الأزمات) ومخاطر غسل الأموال.'
+            },
+            {
+                title: 'التحليل الهيكلي للأسواق المالية الدولية',
+                points: [
+                    '<span class="key-term">السوق النقدية الدولية</span> (Marché Monétaire): تختص بالتمويل قصير الأجل (من يوم إلى سنة)، تتميز بمرونتها وانخفاض مخاطرها. أبرز أدواتها: أذونات الخزانة، شهادات الإيداع، أسواق اليورو-دولار',
+                    '<span class="key-term">سوق رؤوس الأموال الدولي</span> (Marché des Capitaux): تُعنى بالتمويل المتوسط والطويل لتوسعات استثمارية. أدواته الأساسية: السندات الدولية (دين ذات أجل محدد)، الأسهم الدولية (حصص ملكية للشركات لا تحمل تاريخ استحقاق)',
+                    '<span class="key-term">سوق المشتقات المالية</span> (Marché des Dérivés): عقود يُشتق سعرها من أصول أساسية (أسهم، عملات، سلع)، تُستخدم استراتيجياً للتحوط أو المضاربة. تشمل: العقود الآجلة (Forwards)، العقود المستقبلية (Futures)، الخيارات (Options)، عقود المبادلات (Swaps)',
+                    '<span class="key-term">سوق الصرف الأجنبي</span> (Forex): أكبر سوق مالي عالمياً لتداول العملات الأجنبية، يعمل إلكترونياً على مدار 24 ساعة لمدة 5 أيام أسبوعياً، لا يمتلك مركزاً جغرافياً موحداً'
+                ],
+                extra: ''
+            },
+            {
+                title: 'الإطار التنظيمي والتشغيلي (الرقابة والتسوية)',
+                points: [
+                    '<span class="key-term">الهيئة المنظمة لأسواق المال الدولية</span> (IOSCO): تضع المعايير والمبادئ الرقابية لضمان كفاءة المعاملات',
+                    '<span class="key-term">اتحاد البورصات الدولي</span> (WFE): يوفر بيئة تعاونية لتبادل المعلومات ودعم البورصات الناشئة',
+                    '<span class="key-term">بنك التسويات الدولي</span> (BIS): ينسق بين البنوك المركزية لدعم الاستقرار النقدي والمالي'
+                ],
+                extra: '<strong>الدورة التشغيلية للتسوية:</strong> تبدأ بتنفيذ الأمر ← المقاصة (تحديد الالتزامات) ← التسوية ← نقل الملكية القانونية (غالباً وفق قاعدة T+1 أو T+2). <br><strong>ملاحظة:</strong> التوجه الحديث يعتمد على التسوية الآنية (RTGS) لتقليص المخاطر.'
+            },
+            {
+                title: 'التقييم الأكاديمي لكفاءة السوق وتصنيفاتها',
+                points: [
+                    '<span class="key-term">نظرية كفاءة السوق</span>: تعني قدرة السوق على دمج المعلومات الجديدة فوراً في أسعار الأوراق المالية. يُستخدم التحليل الأساسي والفني لدراسة وتقييم هذه الأسعار',
+                    '<span class="key-term">كفاءة ضعيفة</span>: تعكس المعلومات التاريخية',
+                    '<span class="key-term">كفاءة شببه قوية</span>: تعكس المعلومات المتاحة العامة',
+                    '<span class="key-term">كفاءة قوية</span>: تعكس كل المعلومات بما فيها الداخلية/الخاصة'
+                ],
+                extra: '<strong>التصنيف الدولي (وفق MSCI):</strong><br>• <strong>متطورة:</strong> كفاءة عالية وسيولة ممتازة<br>• <strong>ناشئة:</strong> مخاطر أعلى وفرص نمو، تخضع لإصلاحات<br>• <strong>شبه ناشئة (Frontier):</strong> أسواق ذات قيود ومشاكل هيكلية'
+            },
+            {
+                title: 'دراسة حالة: بورصة الجزائر',
+                points: [
+                    '<span class="key-term">السياق التاريخي</span>: أُسست البورصة عام 1990، وانطلق الإصدار الفعلي عام 1998',
+                    '<span class="key-term">البنية التحتية الرقابية والمؤسسية</span>: لجنة تنظيم ومراقبة عمليات البورصة (COSOB)، شركة تسيير بورصة القيم (SGBV)، المؤتمن المركزي لعمليات المقاصة، وسطاء عمليات البورصة (IOB)',
+                    '<span class="key-term">هيكل السوق المحلي</span>: السوق الرئيسية (تضم حالياً 6 شركات كبرى)، سوق المؤسسات الصغيرة والمتوسطة، سوق سندات الدين (مخصصة للشركات والخزينة العمومية)'
+                ],
+                extra: '<strong>التشخيص الأكاديمي:</strong> تعاني البورصة من سيطرة التمويل البنكي الكلاسيكي، ضعف في الثقافة المالية، والاقتصاد الموازي (غير الرسمي).<br><strong>الحلول والآفاق:</strong> تتطلب تنشيطها إصلاحات بنيوية عميقة مثل إدراج أدوات مالية جديدة كـ"الصكوك الإسلامية"، رفع معايير الشفافية، وتحديث أنظمة التداول لدعم عجلة التنمية الاقتصادية في البلاد.'
+            }
+        ],
+        flashcards: [
+            { q: 'ما هو التعريف الأكاديمي للنظام المالي؟', a: 'الإطار المؤسسي والقانوني الذي يسمح بانتقال رؤوس الأموال من وحدات الفائض (المدخرين) إلى وحدات العجز (المستثمرين) عبر وسطاء ماليين بهدف توظيف المدخرات بكفاءة' },
+            { q: 'ما هي الوظائف الرئيسية للنظام المالي؟', a: '1) تجميع المدخرات 2) توفير السيولة (تحويل الأصول غير السائلة إلى نقد) 3) توزيع المخاطر عبر تنويع المحافظ المالية 4) تحقيق التنمية الاقتصادية الكلية' },
+            { q: 'ما الفرق بين السوق النقدية وسوق رؤوس الأموال؟', a: 'السوق النقدية: تمويل قصير الأجل (يوم إلى سنة)، مخاطر منخفضة. سوق رؤوس الأموال: تمويل متوسط وطويل الأجل، لتوسعات استثمارية' },
+            { q: 'ما هي أنواع المشتقات المالية الأربعة؟', a: '1) العقود الآجلة (Forwards) 2) العقود المستقبلية (Futures) 3) الخيارات (Options) 4) عقود المبادلات (Swaps)' },
+            { q: 'ما هي خصائص سوق الصرف الأجنبي (Forex)؟', a: 'أكبر سوق مالي عالمياً، يعمل إلكترونياً 24 ساعة/5 أيام، لتداول العملات الأجنبية، لا يمتلك مركزاً جغرافياً موحداً' },
+            { q: 'ما هي الهيئات التنظيمية الدولية الثلاث الرئيسية؟', a: '1) IOSCO - الهيئة المنظمة لأسواق المال 2) WFE - اتحاد البورصات الدولي 3) BIS - بنك التسويات الدولي' },
+            { q: 'ما هي مراحل الدورة التشغيلية للتسوية؟', a: 'تنفيذ الأمر ← المقاصة (تحديد الالتزامات) ← التسوية ← نقل الملكية القانونية (وفق T+1 أو T+2). التوجه الحديث: التسوية الآنية RTGS' },
+            { q: 'ما هي مستويات كفاءة السوق الثلاثة؟', a: 'ضعيفة: تعكس المعلومات التاريخية. شببه قوية: تعكس المعلومات العامة المتاحة. قوية: تعكس كل المعلومات بما فيها الداخلية' },
+            { q: 'ما هو تصنيف MSCI للأسواق المالية؟', a: 'متطورة (كفاءة عالية، سيولة ممتازة) - ناشئة (مخاطر أعلى، فرص نمو) - شبه ناشئة Frontier (قيود ومشاكل هيكلية)' },
+            { q: 'ما هي مكونات البنية التحتية لبورصة الجزائر؟', a: 'COSOB (لجنة التنظيم والرقابة) - SGBV (شركة التسيير) - المؤتمن المركزي للمقاصة - وسطاء البورصة IOB' }
+        ],
+        quiz: [
+            { q: 'السوق النقدية الدولية تختص بالتمويل:', opts: ['طويل الأجل', 'قصير الأجل (يوم إلى سنة)', 'متوسط الأجل فقط', 'جميع الآجال'], correct: 1 },
+            { q: 'أي من التالي ليس من أدوات المشتقات المالية؟', opts: ['العقود الآجلة (Forwards)', 'الخيارات (Options)', 'أذونات الخزانة', 'عقود المبادلات (Swaps)'], correct: 2 },
+            { q: 'التسوية وفق قاعدة T+2 تعني:', opts: ['التسوية في نفس اليوم', 'التسوية خلال يومين عمل', 'التسوية خلال أسبوعين', 'التسوية خلال شهرين'], correct: 1 },
+            { q: 'سوق يعمل 24 ساعة لمدة 5 أيام أسبوعياً ولا يمتلك مركزاً جغرافياً موحداً:', opts: ['سوق رؤوس الأموال', 'السوق النقدية', 'سوق الصرف الأجنبي (Forex)', 'سوق المشتقات'], correct: 2 },
+            { q: 'الكفاءة القوية للسوق تعني أنها تعكس:', opts: ['المعلومات التاريخية فقط', 'المعلومات العامة المتاحة', 'كل المعلومات بما فيها الداخلية', 'لا تعكس أي معلومات'], correct: 2 },
+            { q: 'أُسست بورصة الجزائر عام:', opts: ['1985', '1990', '1998', '2005'], correct: 1 },
+            { q: 'الهيئة المسؤولة عن وضع المعايير الرقابية لأسواق المال الدولية هي:', opts: ['BIS', 'WFE', 'IOSCO', 'IMF'], correct: 2 }
+        ],
+        glossary: [
+            { term: 'النظام المالي', def: 'الإطار المؤسسي والقانوني لنقل رؤوس الأموال من المدخرين إلى المستثمرين' },
+            { term: 'السوق النقدية', def: 'سوق متخصصة في التمويل قصير الأجل (يوم إلى سنة)' },
+            { term: 'سوق رؤوس الأموال', def: 'سوق متخصصة في التمويل المتوسط والطويل الأجل' },
+            { term: 'المشتقات المالية', def: 'عقود يُشتق سعرها من أصول أساسية، تُستخدم للتحوط أو المضاربة' },
+            { term: 'Forex', def: 'سوق الصرف الأجنبي، أكبر سوق مالي عالمياً' },
+            { term: 'IOSCO', def: 'الهيئة المنظمة لأسواق المال الدولية' },
+            { term: 'BIS', def: 'بنك التسويات الدولي، ينسق بين البنوك المركزية' },
+            { term: 'RTGS', def: 'التسوية الآنية، نظام حديث لتقليص مخاطر التسوية' },
+            { term: 'كفاءة السوق', def: 'قدرة السوق على دمج المعلومات فوراً في أسعار الأوراق المالية' },
+            { term: 'MSCI', def: 'مؤشر عالمي لتصنيف الأسواق إلى متطورة وناشئة وشبه ناشئة' },
+            { term: 'COSOB', def: 'لجنة تنظيم ومراقبة عمليات بورصة الجزائر' },
+            { term: 'العدوى المالية', def: 'انتقال الأزمات المالية من سوق إلى أخرى' }
+        ]
+    },
+    {
+        id: 'admin-comm',
+        title: 'الاتصال والتحرير الإداري',
+        icon: 'fa-envelope-open-text',
+        color: '#2DD4BF',
+        colorDim: 'rgba(45,212,191,0.15)',
+        desc: 'الإطار النظري للاتصال، المنهجية العلمية للتحرير، والنماذج التطبيقية الإدارية',
+        sections: [
+            {
+                title: 'الإطار النظري للاتصال الإداري',
+                points: [
+                    '<span class="key-term">مبادئ الاتصال الفعال</span>: أن يكون واضحاً، ومقبولاً، ومفيداً للمستلم، وقابلاً للقياس والتحقيق، وله هدف محدد',
+                    '<span class="key-term">عناصر العملية الاتصالية</span>: المرسل (مصدر الرسالة) ← الرسالة (محتواها وطريقة ترميزها) ← القناة (وسيلة النقل) ← المستقبل (المتلقي المستهدف) ← فك الرموز ← التغذية العكسية (Feedback) ← التشويش (عوائق)',
+                    '<span class="key-term">مراحل الاتصال</span>: إدراك الرسالة وترميزها ← اختيار الوسيلة المناسبة ← الاستقبال ← فك الرموز ← الاستجابة',
+                    '<span class="key-term">أشكال شبكات الاتصال</span>: شكل العجلة (يمثل الاتصال المركزي)، الشكل الدائري، شكل السلسلة، الشكل المتشابك'
+                ],
+                extra: '<strong>أنواع الاتصال الإداري:</strong><br>• من حيث التنظيم: رسمي (يخضع للوائح) / غير رسمي (علاقات اجتماعية)<br>• من حيث الوسيلة: وجهاً لوجه (مباشر) / عبر وسيط (غير مباشر)<br>• من حيث النطاق: داخلي / خارجي<br><strong>شروط النجاح:</strong> الاختصار، التكرار، الاستمرارية، التنسيق، والالتزام التام بالحقيقة.'
+            },
+            {
+                title: 'المنهجية العلمية للتحرير الإداري',
+                points: [
+                    '<span class="key-term">النصوص التنظيمية</span> تتدرج قانونياً: القرارات الإدارية (تنظم المرافق العامة: وزارية، ولائية، بلدية) ← المراسيم (تشرح وتطبق القوانين) ← التعليمات والمناشير (تفسير النصوص القانونية للموظفين)',
+                    '<span class="key-term">عرض الحالة (المحضر)</span>: وثيقة إخبارية تقتصر على النقل الدقيق والموضوعي لوقائع حدثت فعلاً، لا تتضمن أي رأي أو تحليل',
+                    '<span class="key-term">التقرير</span>: وثيقة تحليلية أعمق تُعنى بدراسة المشكلات، تتضمن تحليلاً شاملاً وإبداء رأي مهني وتوصيات وحلول لمتخذي القرار'
+                ],
+                extra: '<strong>منهجية إعداد المراسلات:</strong><br>1) تحديد الهدف وتحليل القارئ<br>2) جمع المعلومات<br>3) صياغة الرسالة (بأسلوب مباشر للسارة الأخبار أو غير مباشر للسيئة)<br>4) المراجعة والتقييم<br><strong>الهيكل التنظيمي للرسالة (الأجزاء الثابتة):</strong> الترويسة ← المرجع ← الموضوع ← مقدمة ← صلب ← خاتمة ← التوقيع ← المرفقات (إن وجدت)'
+            },
+            {
+                title: 'أنواع الرسائل الإدارية والنماذج التطبيقية',
+                points: [
+                    '<span class="key-term">رسائل إيجابية</span>: مباشرة وسهلة الاستيعاب',
+                    '<span class="key-term">رسائل حيادية</span>: تتضمن تعليمات واستفسارات روتينية',
+                    '<span class="key-term">رسائل سلبية</span>: تتطلب مهارة وأسلوباً تمهيدياً غير مباشر للحفاظ على العلاقات الطيبة',
+                    '<span class="key-term">رسائل إقناعية</span>: تهدف إلى حمل القارئ على اتخاذ إجراء معين'
+                ],
+                extra: '<strong>النماذج التطبيقية:</strong><br>• الوثائق الإدارية العامة الجاهزة: المذكرات الداخلية، عروض الحال والتقارير، محاضر التنصيب والمعاينة، جداول الإرسال، الهياكل النموذجية للقرارات والمراسيم والتعليلات<br>• نماذج رسائل الأعمال المتخصصة: رسائل تحصيل الديون (تتدرج تصاعدياً من التذكير الودي ← الإقناع ← الإلحاح ثم الإنذار)، طلبات الائتمان التجاري، رسائل المبيعات، طلبات التوظيف (تُعد رسائل إقناعية تُبرز مهارات المتقدم وتُرفق بإرشادات لاجتياز المقابلة الشخصية بنجاح)'
+            }
+        ],
+        flashcards: [
+            { q: 'ما هي مبادئ الاتصال الفعال؟', a: 'أن يكون واضحاً، مقبولاً، مفيداً للمستمل، قابلاً للقياس والتحقيق، وله هدف محدد' },
+            { q: 'ما هي عناصر العملية الاتصالية بالترتيب؟', a: 'المرسل ← الرسالة (محتوى وترميز) ← القناة ← المستقبل ← فك الرموز ← التغذية العكسية (Feedback) ← التشويش' },
+            { q: 'ما الفرق بين عرض الحالة (المحضر) والتقرير؟', a: 'المحضر: وثيقة إخبارية، نقل دقيق لوقائع، بدون رأي أو تحليل. التقرير: وثيقة تحليلية، دراسة مشكلات، رأي مهني وتوصيات' },
+            { q: 'ما هو التدرج القانوني للنصوص التنظيمية؟', a: 'القرارات الإدارية (وزارية، ولائية، بلدية) ← المراسيم (تشرح وتطبق القوانين) ← التعليمات والمناشير (تفسير النصوص للموظفين)' },
+            { q: 'ما هي الأجزاء الثابتة للهيكل التنظيمي للرسالة؟', a: 'الترويسة ← المرجع ← الموضوع ← مقدمة ← صلب ← خاتمة ← التوقيع ← المرفقات (إن وجدت)' },
+            { q: 'ما هي أنواع الرسائل الإدارية الأربعة؟', a: 'إيجابية (مباشرة وسهلة) - حيادية (تعليمات واستفسارات) - سلبية (أسلوب تمهيدي غير مباشر) - إقناعية (تحث على اتخاذ إجراء)' },
+            { q: 'كيف تتدرج رسائل تحصيل الديون؟', a: 'تتصاعد من: التذكير الودي ← الإقناع ← الإلحاح ← الإنذار' },
+            { q: 'ما هي أشكال شبكات الاتصال الأربعة؟', a: 'شكل العجلة (مركزي) - الشكل الدائري - شكل السلسلة - الشكل المتشابك' }
+        ],
+        quiz: [
+            { q: 'عنصر الاتصال الذي يضمن وصول الفهم الصحيح هو:', opts: ['المرسل', 'القناة', 'التغذية العكسية (Feedback)', 'التشويش'], correct: 2 },
+            { q: 'وثيقة إخبارية تقتصر على النقل الدقيق لوقائع بدون رأي أو تحليل:', opts: ['التقرير', 'عرض الحالة (المحضر)', 'المنشور', 'التعليمة'], correct: 1 },
+            { q: 'الرسائل التي تتطلب أسلوباً تمهيدياً غير مباشر هي:', opts: ['الرسائل الإيجابية', 'الرسائل الحيادية', 'الرسائل السلبية', 'الرسائل الإقناعية'], correct: 2 },
+            { q: 'في التدرج القانوني، ما يأتي بعد القرارات الإدارية:', opts: ['القوانين', 'المراسيم', 'التعليمات', 'المناشير'], correct: 1 },
+            { q: 'شكل شبكة الاتصال الذي يمثل الاتصال المركزي هو:', opts: ['الشكل الدائري', 'شكل السلسلة', 'شكل العجلة', 'الشكل المتشابك'], correct: 2 },
+            { q: 'الخطوة الأولى في منهجية إعداد المراسلات هي:', opts: ['جمع المعلومات', 'صياغة الرسالة', 'تحديد الهدف وتحليل القارئ', 'المراجعة والتقييم'], correct: 2 }
+        ],
+        glossary: [
+            { term: 'التغذية العكسية', def: 'استجابة المستقبل تؤكد وصول الفهم الصحيح للرسالة' },
+            { term: 'التشويش', def: 'العوامل التي تعيق العملية الاتصالية' },
+            { term: 'المحضر', def: 'وثيقة إخبارية تنقل وقائع حدثت بدون تحليل أو رأي' },
+            { term: 'التقرير', def: 'وثيقة تحليلية تتضمن دراسة مشكلات وتوصيات' },
+            { term: 'المراسيم', def: 'نصوص تنظيمية تشرح وتطبق القوانين' },
+            { term: 'التعليمات والمناشير', def: 'نصوص تفسيرية للنصوص القانونية موجهة للموظفين' },
+            { term: 'الرسائل الإقناعية', def: 'رسائل تهدف إلى حمل القارئ على اتخاذ إجراء معين' }
+        ]
+    },
+    {
+        id: 'intl-econ',
+        title: 'الاقتصاد الدولي',
+        icon: 'fa-globe',
+        color: '#F97066',
+        colorDim: 'rgba(249,112,102,0.15)',
+        desc: 'نظريات التجارة الدولية، ميزان المدفوعات، سياسات الصرف، والتمويل والاستثمار الدولي',
+        sections: [
+            {
+                title: 'نظريات التبادل الدولي',
+                points: [
+                    '<span class="key-term">المذهب التجاري (المركنتيلي)</span>: يرى أن ثروة الأمة تُقاس بما تملكه من معادن نفيسة (ذهب وفضة)، والتجارة الخارجية هي الوسيلة. يؤكد على تحقيق فائض في الميزان التجاري (صادرات أكبر من واردات) مع ضرورة تدخل الدولة لتقييد الواردات',
+                    '<span class="key-term">نظرية الميزة المطلقة</span> (آدم سميث): تقوم على تقسيم العمل والتخصص. الدولة يجب أن تتخصص في إنتاج السلع التي تتمتع فيها بميزة مطلقة (تنتجها بتكلفة أقل أو بعدد ساعات عمل أقل) وتصدرها، وتستورد ما لا تتمتع فيه بهذه الميزة',
+                    '<span class="key-term">نظرية الميزة النسبية</span> (ديفيد ريكاردو): جاءت لمعالجة قصور نظرية سميث. بيّنت أن التجارة ممكنة ومربحة حتى لو كانت الدولة تتفوق في إنتاج جميع السلع، فتتخصص في السلعة التي تمتلك فيها تفوقاً نسبياً أكبر (أو تخلفاً نسبياً أقل) معتمدة على مقارنة التكاليف النسبية أو تكلفة الفرصة البديلة. المثال الشهير: النبيذ والنسيج بين إنجلترا والبرتغال',
+                    '<span class="key-term">النظرية النيوكلاسيكية</span> (هيكشر-أولين): تُعرف بنظرية "وفرة عناصر الإنتاج". تفسر اختلاف التكاليف النسبية باختلاف وفرة عناصر الإنتاج بين الدول. الدولة تتخصص في إنتاج وتصدير السلع التي يتطلب إنتاجها كثافة في العنصر المتوفر لديها بكثرة (سعره رخيص)، وتستورد السلع التي يتطلب إنتاجها عناصر نادرة لديها'
+                ],
+                extra: ''
+            },
+            {
+                title: 'ميزان المدفوعات (Balance of Payments)',
+                points: [
+                    '<span class="key-term">التعريف</span>: سجل محاسبي إحصائي منتظم يُسجل المعاملات الاقتصادية (السلعية والخدمية والمالية) التي تتم بين المقيمين في دولة ما والمقيمين في دول أخرى خلال فترة زمنية محددة (عادة سنة)',
+                    '<span class="key-term">قاعدة القيد المزدوج</span>: العمليات التي تنتج عنها تدفق أموال إلى الداخل تُسجل دائن (+) حقوق. العمليات التي يترتب عليها دفع أموال للخارج تُسجل مدین (-) التزامات',
+                    '<span class="key-term">حساب المعاملات الجارية</span>: يشمل التجارة المنظورة (الصادرات والواردات السلعية)، التجارة غير المنظورة (الخدمات مثل النقل والتأمين والسياحة)، حساب الدخل، والتحويلات الجارية (تحويلات من طرف واحد)',
+                    '<span class="key-term">حساب رؤوس الأموال والعمليات المالية</span>: يُسجل حركة رؤوس الأموال (الاستثمارات المباشرة وغير المباشرة، القروض والأموال)',
+                    '<span class="key-term">حساب التسويات الرسمية</span>: يشمل الذهب والعملات الأجنبية وحقوق السحب الخاصة، ويعكس النتيجة النهائية للميزان'
+                ],
+                extra: ''
+            },
+            {
+                title: 'السياسات التجارية وأسعار الصرف',
+                points: [
+                    '<span class="key-term">سياسة التجارة الحرة</span>: تدعو إلى عدم تدخل الدولة وترك حركة التجارة لآليات السوق',
+                    '<span class="key-term">سياسة الحماية التجارية</span>: تستخدم أدوات مخصصة لحماية الصناعات الوطنية أو تصحيح العجز في ميزان المدفوعات، مثل الرسوم الجمركية ونظام الحصص',
+                    '<span class="key-term">أنواع أسعار الصرف</span>: الاسمي (المعلن في السوق)، الحقيقي (يأخذ في الاعتبار معدلات التضخم والأسعار)، الفعلي (متوسط سلة من العملات)',
+                    '<span class="key-term">نظريات تحديد سعر الصرف</span>: يتحدد السعر التوازني من خلال تفاعل قوى العرض والطلب على العملة في سوق الصرف. نظرية تعادل القوة الشرائية: تربط قيمة العملة بقدرتها الشرائية الداخلية مقارنة بقدرتها الشرائية في الخارج'
+                ],
+                extra: ''
+            },
+            {
+                title: 'التمويل الدولي والاستثمار الأجنبي',
+                points: [
+                    '<span class="key-term">مصادر التمويل الدولي الرسمية</span>: القروض والمساعدات من الحكومات أو المؤسسات الدولية (صندوق النقد الدولي، البنك الدولي)',
+                    '<span class="key-term">مصادر التمويل الدولي الخاصة</span>: البنوك التجارية متعددة الجنسيات والشركات. تتنوع القروض حسب الآجال: قصيرة، متوسطة، وطويلة الأجل',
+                    '<span class="key-term">الاستثمار الأجنبي المباشر (FDI)</span>: انتقال رأس المال بهدف امتلاك وإدارة مشروعات إنتاجية، يمنح المستثمر حق الرقابة والإدارة والتنظيم',
+                    '<span class="key-term">الاستثمار غير المباشر (Portfolio Investment)</span>: شراء الأوراق المالية (الأسهم والسندات) في الأسواق المالية دون نية السيطرة على الإدارة',
+                    '<span class="key-term">نظريات الاستثمار الأجنبي</span>: النظرية الكلاسيكية (أرجعت انتقال رأس المال إلى فروق أسعار الفائدة بين الدول). النظريات الحديثة (ركزت على نشأة الشركات متعددة الجنسيات): نظرية الميزة الاحتكارية، نظرية دورة حياة السلعة'
+                ],
+                extra: ''
+            }
+        ],
+        flashcards: [
+            { q: 'ما هو جوهر المذهب التجاري (المركنتيلي)؟', a: 'ثروة الأمة تُقاس بالمعادن النفيسة، التجارة الخارجية وسيلتها، يجب تحقيق فائض تجاري (صادرات > واردات) مع تدخل الدولة لتقييد الواردات' },
+            { q: 'ما الفرق بين نظرية الميزة المطلقة والنسبية؟', a: 'المطلقة (سميث): تتخصص الدولة فيما تنتجه بتكلفة مطلقة أقل. النسبية (ريكاردو): التجارة ممكنة حتى لو تتفوق في كل شيء، تتخصص فيما لديها فيه تفوق نسبي أكبر' },
+            { q: 'ما هي فكرة نظرية هيكشر-أولين؟', a: 'نظرية وفرة عناصر الإنتاج: الدولة تُصدّر سلعاً كثيفة في العنصر المتوفر لديها، وتستورد سلعاً كثيفة في العنصر النادر' },
+            { q: 'ما هو ميزان المدفوعات وما قاعدته المحاسبية؟', a: 'سجل محاسبي للمعاملات الاقتصادية بين المقيمين وغير المقيمين خلال سنة. يعتمد على قاعدة القيد المزدوج: دائن (+) للداخل، مدین (-) للخارج' },
+            { q: 'ما هي مكونات ميزان المدفوعات الثلاثة؟', a: '1) حساب المعاملات الجارية (تجارة منظرة وغير منظرة، دخل، تحويلات) 2) حساب رؤوس الأموال والعمليات المالية 3) حساب التسويات الرسمية' },
+            { q: 'ما الفرق بين سياسة التجارة الحرة وسياسة الحماية؟', a: 'الحرة: عدم تدخل الدولة، ترك آليات السوق. الحماية: تدخل الدولة بأدوات كالرسوم الجمركية والحصص لحماية الصناعة الوطنية' },
+            { q: 'ما هي أنواع أسعار الصرف الثلاثة؟', a: 'الاسمي: المعلن في السوق. الحقيقي: مع حساب التضخم. الفعلي: متوسط سلة عملات' },
+            { q: 'ما الفرق بين FDI والاستثمار غير المباشر؟', a: 'FDI: امتلاك وإدارة مشروعات إنتاجية مع حق الرقابة والإدارة. غير المباشر (Portfolio): شراء أسهم وسندات دون سيطرة على الإدارة' }
+        ],
+        quiz: [
+            { q: 'المذهب الذي يرى أن ثروة الأمة تُقاس بالمعادن النفيسة هو:', opts: ['النظرية الكلاسيكية', 'المذهب التجاري (المركنتيلي)', 'نظرية هيكشر-أولين', 'نظرية الميزة النسبية'], correct: 1 },
+            { q: 'من صاحب نظرية الميزة النسبية؟', opts: ['آدم سميث', 'هيكشر وأولين', 'ديفيد ريكاردو', 'جون مينارد كينز'], correct: 2 },
+            { q: 'نظرية وفرة عناصر الإنتاج تُعرف بنظرية:', opts: ['الميزة المطلقة', 'الميزة النسبية', 'هيكشر-أولين', 'المركنتيلية'], correct: 2 },
+            { q: 'في قيد ميزان المدفوعات، الصادرات تُسجل في:', opts: ['المدین (-)', 'الدائن (+)', 'حساب رأس المال فقط', 'لا تُسجل'], correct: 1 },
+            { q: 'الاستثمار الذي يمنح حق الرقابة والإدارة والتنظيم هو:', opts: ['الاستثمار غير المباشر', 'شراء السندات', 'الاستثمار الأجنبي المباشر (FDI)', 'المضاربة في الأسواق'], correct: 2 },
+            { q: 'نظرية تعادل القوة الشرائية تربط قيمة العملة بـ:', opts: ['أسعار الفائدة', 'القدرة الشرائية مقارنة بالخارج', 'معدل البطالة', 'احتياطات الذهب'], correct: 1 },
+            { q: 'أداة من أدوات سياسة الحماية التجارية:', opts: ['حرية السوق', 'الرسوم الجمركية', 'تعويم العملة', 'الاستثمار الأجنبي'], correct: 1 }
+        ],
+        glossary: [
+            { term: 'المركنتيلية', def: 'مذهب اقتصادي يربط ثروة الأمة بفائض ميزانها التجاري من المعادن النفيسة' },
+            { term: 'الميزة المطلقة', def: 'قدرة دولة على إنتاج سلعة بتكلفة أقل من دول أخرى (آدم سميث)' },
+            { term: 'الميزة النسبية', def: 'التخصص في إنتاج السلعة ذات التفوق النسبي الأكبر حتى مع التفوق في كل شيء (ريكاردو)' },
+            { term: 'ميزان المدفوعات', def: 'سجل محاسبي للمعاملات الاقتصادية بين المقيمين وغير المقيمين' },
+            { term: 'القيد المزدوج', def: 'كل عملية تُسجل مرتين: دائن (+) ومدین (-)' },
+            { term: 'FDI', def: 'الاستثمار الأجنبي المباشر: امتلاك وإدارة مشروعات إنتاجية' },
+            { term: 'Portfolio Investment', def: 'الاستثمار غير المباشر: شراء أوراق مالية دون سيطرة إدارية' },
+            { term: 'تعادل القوة الشرائية', def: 'نظرية تربط قيمة العملة بقدرتها الشرائية مقارنة بالخارج' }
+        ]
+    },
+    {
+        id: 'business-law',
+        title: 'قانون الأعمال الجزائري',
+        icon: 'fa-scale-balanced',
+        color: '#60A5FA',
+        colorDim: 'rgba(96,165,250,0.15)',
+        desc: 'مصادر القانون ونطاقه، العقود التجارية، التاجر، الشركات التجارية، ووسائل الدفع الإلكتروني',
+        sections: [
+            {
+                title: 'مصادر قانون الأعمال ونطاقه',
+                points: [
+                    '<span class="key-term">الخاصيتان الأساسيتان</span>: السرعة (تجاوز الشكليات المعقدة في إبرام المعاملات) والائتمان (يستوجب توفير وسائل حماية وإشهار دقيقة مثل السجل التجاري)',
+                    '<span class="key-term">المصادر الرسمية (حسب التدرج القانوني)</span>: التشريع التجاري (المصدر الأساسي والأول) ← التشريع المدني (المرجع العام يُطبق عند غياب نص تجاري صريح) ← العرف والعادات الاتفاقية (القواعد والممارسات التي اعتاد التجار على التعامل بها) ← مبادئ الشريعة الإسلامية (يُلجأ إليها احتياطياً عند غياب النص التشريعي والعرفي)',
+                    '<span class="key-term">نطاق قانون الأعمال</span>: يتسع ليشمل فروعاً مكملة تهدف إلى حماية البيئة الاقتصادية: قانون الاستهلاك (يهدف إلى إعادة التوازن وحماية الطرف الضعيف - المستهلك)، قانون الملكية الفكرية (يمنح حماية قانونية للإبداعات الفكرية كالعلامات التجارية والرسوم الصناعية ويضمن حقاً احتكارياً واستئثارياً لمالكها)'
+                ],
+                extra: ''
+            },
+            {
+                title: 'العقود التجارية والأعمال التجارية',
+                points: [
+                    '<span class="key-term">تعريف العقد</span>: اتفاق بموجبه يلتزم شخص أو أكثر بمنح شيء أو فعل أكثر. يُعد الأساس القانوني للمعاملات التجارية',
+                    '<span class="key-term">أركان العقد الثلاثة</span>: الرضا (تطابق الإيجاب والقبول بين الأطراف) - المحل (ما يلتزم به المتعاقد، ويُشترط أن يكون ممكناً ومشروعاً) - السبب (الغرض المباشر من وراء الالتزام المبرم)',
+                    '<span class="key-term">أصناف الأعمال التجارية</span>: أعمال تجارية بحسب الموضوع - أعمال تجارية بحسب الشكل - أعمال تجارية بالتبعية - أعمال مختلطة'
+                ],
+                extra: ''
+            },
+            {
+                title: 'أشخاص البيئة التجارية: التاجر',
+                points: [
+                    '<span class="key-term">تعريف التاجر</span>: يُكتسب الوصف القانوني متى باشر الشخص الأعمال التجارية واتخذها مهنة معتادة يمارسها بصورة منظمة ومستقلة',
+                    '<span class="key-term">الأهلية التجارية</span>: القاعدة: بلوغ سن الرشد القانوني (19 سنة) مع التمتع بالقوى العقلية السليمة. الاستثناءات: القاصر المُرشّد (18 سنة) بأذن مسبق ومصادقة عليه من المحكمة - المرأة المتزوجة تتمتع بأهلية تجارية مستقلة تماماً إذا مارست نشاطاً تجارياً منفصلاً عن نشاط زوجها',
+                    '<span class="key-term">الالتزامات القانونية للتاجر</span>: مسك الدفاتر التجارية (دفتر اليومية ودفتر الجرد) وتُعتبر هذه الدفاتر مرآة عاكسة للمركز المالي للتاجر ووسيلة إثبات قانونية معتمدة. القيد في السجل التجاري (أداة الإشهار القانوني) ويترتب عليه أمران: قرينة قاطعة على اكتساب صفة التاجر بالنسبة للشخص الطبيعي، ومنح الشخصية المعنوية (الاعتبارية) للشركات التجارية'
+                ],
+                extra: ''
+            },
+            {
+                title: 'الشركات التجارية',
+                points: [
+                    '<span class="key-term">تعريف الشركة</span>: نظام قانوني يُزاول من خلاله أشخاص (طبيعيون أو اعتباريون) النشاط التجاري عبر تقديم حصص (نقدية أو عينية أو عمل) مع توفر ضرورة "نية المشاركة" في الأرباح أو الخسائر',
+                    '<span class="key-term">التمييز عن الجمعية</span>: تتميز الشركة التجارية بكون الهدف الأساسي والمحوري لها هو تحقيق الربح',
+                    '<span class="key-term">شركات الأشخاص</span>: تقوم أساساً على الاعتبار الشخصي والثقة المتبادلة بين الشركاء، يُمنع التنازل عن الحصص للغير إلا بإجماع كافة الشركاء. أمثلة: شركة التضامن (مسؤولية غير محدودة)، التوصية البسيطة، شركة المحاصة',
+                    '<span class="key-term">شركات الأموال</span>: ترتكز على الاعتبار المالي البحت، تنقسم فيها رؤوس الأموال إلى أسهم قابلة للتداول، ولا تتأثر بشخصية الشريك (كوفاته أو إفلاسه). أمثلة: شركة المساهمة SPA (لا يُشترط أن يقل عدد شركائها عن 7، لا يتحملون الخسائر إلا في حدود حصصهم)، التوصية بالأسهم، الشركة ذات المسؤولية المحدودة SARL (نظام هجين يجمع خصائص شركات الأشخاص والأموال)'
+                ],
+                extra: ''
+            },
+            {
+                title: 'التطورات الحديثة: وسائل الدفع الإلكتروني',
+                points: [
+                    '<span class="key-term">التطور العام</span>: استجابةً للتقدم التكنولوجي، تطورت وسائل الدفع من المقايضة والنقود الورقية التقليدية إلى وسائط إلكترونية تمتاز بالسرعة العالية والفعالية في إتمام الصفقات',
+                    '<span class="key-term">البطاقات البنكية (الائتمانية)</span>: تصدرها المؤسسات البنكية بحدود مبالغ معينة، تهدف إلى تسهيل وتوفير عمليات الوفاء والوقت والجهد',
+                    '<span class="key-term">الشيك الإلكتروني</span>: يُحرر إلكترونياً ويُذيل بتوقيع إلكتروني، يمثل التزاماً قانونياً يعادل الورقي، ويُمثل أمراً بالدفع لصالح المستفيد إلى البنك',
+                    '<span class="key-term">السفتجة الإلكترونية والأوراق التجارية الأخرى</span>: حوالات تتم عبر شبكات الاتصالات الإلكترونية، عبارة عن صكوك مستوفية لكافة البيانات القانونية nhưng محفوظة على دعائم ممغنطة'
+                ],
+                extra: ''
+            }
+        ],
+        flashcards: [
+            { q: 'ما هي خاصيتا قانون الأعمال الأساسيتان؟', a: '1) السرعة: تجاوز الشكليات المعقدة 2) الائتمان: توفير وسائل حماية وإشهار دقيقة (كالسجل التجاري)' },
+            { q: 'ما هو التدرج القانوني لمصادر قانون الأعمال؟', a: 'التشريع التجاري (أساسي) ← التشريع المدني (مرجع عام) ← العرف والعادات الاتفاقية ← مبادئ الشريعة الإسلامية (احتياطي)' },
+            { q: 'ما هي أركان العقد الثلاثة؟', a: '1) الرضا: تطابق الإيجاب والقبول 2) المحل: ما يلتزم به المتعاقد (ممكن ومشروع) 3) السبب: الغرض المباشر من الالتزام' },
+            { q: 'ما هي شروط الأهلية التجارية؟', a: 'القاعدة: بلوغ 19 سنة مع سلامة القوى العقلية. استثناء: القاصر المُرشّد (18 سنة) بإذن المحكمة. المرأة المتزوجة: أهلية مستقلة إذا كان النشاط منفصلاً عن زوجها' },
+            { q: 'ما هي التزامات التاجر القانونية الرئيسية؟', a: '1) مسك الدفاتر التجارية (اليومية والجرد) 2) القيد في السجل التجاري (يمنح صفة التاجر والشخصية المعنوية للشركات)' },
+            { q: 'ما الفرق بين شركات الأشخاص وشركات الأموال؟', a: 'شركات الأشخاص: أساسها الثقة الشخصية، يُمنع التنازل للغير إلا بإجماع. شركات الأموال: أساسها المالي البحت، رأس المال مقسم لأسهم قابلة للتداول' },
+            { q: 'ما هي أنواع شركات الأموال؟', a: '1) شركة المساهمة SPA (7 شركاء كحد أدنى) 2) التوصية بالأسهم 3) الشركة ذات المسؤولية المحدودة SARL (هجين)' },
+            { q: 'ما هي وسائل الدفع الإلكتروني التي نظمها المشرع؟', a: '1) البطاقات البنكية/الائتمانية 2) الشيك الإلكتروني (يعادل الورقي قانونياً) 3) السفتجة الإلكترونية والحوالات عبر الشبكات' }
+        ],
+        quiz: [
+            { q: 'المصدر الأساسي والأول لأحكام قانون الأعمال هو:', opts: ['التشريع المدني', 'العرف التجاري', 'التشريع التجاري', 'الشريعة الإسلامية'], correct: 2 },
+            { q: 'ركن العقد الذي يتطلب تطابق الإيجاب والقبول هو:', opts: ['المحل', 'السبب', 'الرضا', 'الشكلية'], correct: 2 },
+            { q: 'سن الرشد القانوني لممارسة التجارة في الجزائر هو:', opts: ['16 سنة', '18 سنة', '19 سنة', '21 سنة'], correct: 2 },
+            { q: 'القيد في السجل التجاري يُعتبر:', opts: ['إجراء شكلي فقط', 'قرينة قاطعة على صفة التاجر وأداة إشهار قانوني', 'شرط للسفر فقط', 'إلزامي للشخصيات الاعتبارية فقط'], correct: 1 },
+            { q: 'شركة المساهمة SPA يشترط أن لا يقل عدد شركائها عن:', opts: ['2', '3', '5', '7'], correct: 3 },
+            { q: 'الشركة ذات المسؤولية المحدودة SARL تُعد نظاماً:', opts: ['من شركات الأشخاص فقط', 'من شركات الأموال فقط', 'هجيناً يجمع خصائص النوعين', 'لا تنتمي لأي تصنيف'], correct: 2 },
+            { q: 'الشيك الإلكتروني في القانون الجزائري:', opts: ['لا قيمة قانونية له', 'يعادل الشيك الورقي قانونياً', 'يحتاج مصادقة وزارية', 'مقبول في المعاملات المحلية فقط'], correct: 1 }
+        ],
+        glossary: [
+            { term: 'السجل التجاري', def: 'أداة الإشهار القانوني، قرينة قاطعة على اكتساب صفة التاجر' },
+            { term: 'الدفاتر التجارية', def: 'دفتر اليومية ودفتر الجرد، مرآة المركز المالي ووسيلة إثبات' },
+            { term: 'شركة التضامن', def: 'شركة أشخاص بمسؤولية غير محدودة، أساسها الثقة المتبادلة' },
+            { term: 'SPA', def: 'شركة المساهمة، شركة أموال لا يقل شركاؤها عن 7' },
+            { term: 'SARL', def: 'الشركة ذات المسؤولية المحدودة، نظام هجين بين أشخاص وأموال' },
+            { term: 'التحويل الإلكتروني', def: 'تطور وسائل الدفع من المقايضة والنقود الورقية إلى الوسائط الرقمية' }
+        ]
+    },
+    {
+        id: 'info-logistics',
+        title: 'نظم المعلومات واللوجستيك',
+        icon: 'fa-boxes-stacked',
+        color: '#FB923C',
+        colorDim: 'rgba(251,146,60,0.15)',
+        desc: 'مفاهيم اللوجستيك، إدارة سلسلة الإمداد، التكامل الوظيفي، وأنظمة المعلومات اللوجستية',
+        sections: [
+            {
+                title: 'الإطار المفاهيمي للوجستيك وأنشطته',
+                points: [
+                    '<span class="key-term">مفهوم اللوجستيك</span>: الأنشطة المتكاملة التي تخطط وتنفذ وتراقب تدفق المواد الأولية والمنتجات وتخزينها من نقطة الإنتاج إلى نقطة الاستهلاك بكفاءة أفضل وتكلفة أقل. تشمل الأنشطة: التنبؤ، إدارة الطلب، المخزون، النقل، التغليف، وما بعد البيع',
+                    '<span class="key-term">أهمية اللوجستيك حسب المدى الزمني</span>: القصير: يحسن تدفق المواد - المتوسط: يقلل التكاليف ويزيد الكفاءة - الطويل: يُساهم في تحقيق ميزة تنافسية واستغلال الاستثمارات الأمثل',
+                    '<span class="key-term">أهداف الإدارة اللوجستية</span>: تحقيق الاستمرارية والمردودية من خلال: قاعدة السبع M\'s (المنتج، الكمية، الحالة، المكان، الوقت، المستهلك، التكلفة المناسبة) وقاعدة "اللاءات" (صفر أخطاء، صفر مخزون، صفر تعطل...)',
+                    '<span class="key-term">الاتجاهات الحديثة</span>: توجه المؤسسات اليوم نحو الاستعانة بمزود خارجي (3PL) لتنفيذ العمليات اللوجستية، بناء تحالفات وشراكات لتخفيض التكاليف وتقليص المخاطر'
+                ],
+                extra: ''
+            },
+            {
+                title: 'إدارة سلسلة الإمداد',
+                points: [
+                    '<span class="key-term">مفهوم سلسلة الإمداد</span>: شبكة تنظيمية تربط بين الموردين والمؤسسات والموزعين لإيصال المنتج النهائي. تعتمد على ثلاثة تدفقات أساسية: المادي (انتقال المنتجات)، المعلوماتي (تبادل البيانات للتنسيق والتنبؤ)، المالي (حركة الأموال العكسية)',
+                    '<span class="key-term">نماذج سلسلة الإمداد</span> (تختلف حسب طبيعة الطلب): النموذج المستمر (للمنتجات ذات الطلب الثابت) - النموذج السريع (للمنتجات ذات التغير السريع كالموضة) - النموذج المرن (للسلع الموسمية)',
+                    '<span class="key-term">مستويات الإدارة الفعالة</span>: الاستراتيجي (أجل طويل): تصميم بنية السلسلة واختيار المواقع - التكتيكي (أجل متوسط وقصير): التخطيط للموارد والتوزيع واختيار قنوات النقل والتخزين - العملي (يومي روتيني): التسيير السريع للاستجابة للطلبات والإنتاج والمخزون'
+                ],
+                extra: ''
+            },
+            {
+                title: 'التكامل الوظيفي في المؤسسة',
+                points: [
+                    '<span class="key-term">التكامل مع الإنتاج</span>: الإنتاج يُعلم اللوجستيكَ بخطط الاحتياجات لضمان توفير المواد الخام في الوقت المناسب وتجنب تعطل التصنيع',
+                    '<span class="key-term">التكامل مع التسويق</span>: الإدارة اللوجستية تعتمد على بيانات أبحاث السوق والمبيعات المتوقعة لضبط المخزون، بينما التوصيل اللوجستي يؤثر مباشرة على رضا العملاء الذي تسعى إليه إدارة التسويق',
+                    '<span class="key-term">التكامل مع المالية</span>: إدارة المالية تقدم التمويل اللازم للشراء، مقابل تقديم اللوجستي بيانات دقيقة حول تكاليف الأنشطة وربحية المنتجات'
+                ],
+                extra: ''
+            },
+            {
+                title: 'دور نظم المعلومات في تصميم الشبكات اللوجستية',
+                points: [
+                    '<span class="key-term">نظام تخطيط موارد المؤسسة (ERP)</span>: نظام متكامل يربط وظائف المؤسسة المختلفة (إمدادات، تسويق، مالية...) في قاعدة بيانات واحدة. يوفر رؤية شاملة في الوقت الفعلي، يقلل من التعقيد الإداري، ويُسرّع التخطيط واتخاذ القرارات',
+                    '<span class="key-term">نظام إدارة النقل (TMS)</span>: منصة لوجستية تُعنى بتخطيط وتنفيذ ومراقبة حركة الشحن والنقل. يهدف إلى أتمتة العمليات، تقليص تكاليف تكرار الرحلات، وتحسين مسارات النقل لضمان تسليم البضائع في الوقت المناسب',
+                    '<span class="key-term">نظام إدارة المستودعات (WMS)</span>: برنامج لتنظيم استلام وتخزين وتتبع البضائع إلى مرحلة الشحن. يساعد على الاستخدام الأمثل لمساحة المستودع، تقليص التكاليف، تسريع إعداد الطلبات، وتوفير رؤية فورية ودقيقة لمستويات المخزون'
+                ],
+                extra: ''
+            }
+        ],
+        flashcards: [
+            { q: 'ما هو مفهوم اللوجستيك؟', a: 'الأنشطة المتكاملة التي تخطط وتنفذ وتراقب تدفق المواد والمنتجات من نقطة الإنتاج إلى الاستهلاك بكفاءة أفضل وتكلفة أقل' },
+            { q: 'ما هي أنشطة اللوجستيك الرئيسية؟', a: 'التنبؤ، إدارة الطلب، المخزون، النقل، التغليف، الخدمة بعد البيع' },
+            { q: 'ما هي قاعدة السبع M\'s في اللوجستيك؟', a: 'المنتج، الكمية، الحالة، المكان، الوقت، المستهلك، التكلفة المناسبة' },
+            { q: 'ما هي التدفقات الثلاثة في سلسلة الإمداد؟', a: '1) المادي: انتقال المنتجات 2) المعلوماتي: تبادل البيانات للتنسيق 3) المالي: حركة الأموال العكسية' },
+            { q: 'ما هي نماذج سلسلة الإمداد الثلاثة؟', a: 'المستمر (طلب ثابت) - السريع (تغير سريع كالموضة) - المرن (سلع موسمية)' },
+            { q: 'ما هي مستويات إدارة سلسلة الإمداد؟', a: 'استراتيجي (طويل الأجل: تصميم البنية والمواقع) - تكتيكي (متوسط: تخطيط الموارد والنقل) - عملي (يومي: استجابة سريعة للطلبات)' },
+            { q: 'ما هو نظام ERP وما فوائده؟', a: 'نظام تخطيط موارد المؤسسة: متكامل يربط كل الوظائف في قاعدة بيانات واحدة، يوفر رؤية شاملة فورية، يقلل التعقيد، يُسرّع القرارات' },
+            { q: 'ما الفرق بين TMS و WMS؟', a: 'TMS: إدارة النقل (تخطيط وتنفيذ ومراقبة الشحن). WMS: إدارة المستودعات (استلام وتخزين وتتبع البضائع)' }
+        ],
+        quiz: [
+            { q: 'قاعدة السبع M\'s في اللوجستيك لا تشمل:', opts: ['المنتج', 'المكان', 'الميزانية', 'الوقت'], correct: 2 },
+            { q: 'التدفق الذي يمثل حركة الأموال العكسية في سلسلة الإمداد هو:', opts: ['المادي', 'المعلوماتي', 'المالي', 'التشغيلي'], correct: 2 },
+            { q: 'النموذج المناسب للمنتجات ذات التغير السريع كالموضة هو:', opts: ['النموذج المستمر', 'النموذج السريع', 'النموذج المرن', 'النموذج الثابت'], correct: 1 },
+            { q: 'نظام ERP يربط وظائف المؤسسة في:', opts: ['عدة قواعد بيانات منفصلة', 'قاعدة بيانات واحدة', 'ملفات Excel', 'أوراق work'], correct: 1 },
+            { q: 'النظام المسؤول عن تنظيم استلام وتخزين وتتبع البضائع هو:', opts: ['ERP', 'TMS', 'WMS', 'CRM'], correct: 2 },
+            { q: 'مستوى الإدارة الذي يهتم بتصميم بنية السلسلة واختيار المواقع هو:', opts: ['العملي', 'التكتيكي', 'الاستراتيجي', 'التشغيلي'], correct: 2 },
+            { q: 'الاتجاه الحديث نحو الاستعانة بمزود خارجي يُعرف بـ:', opts: ['B2B', '3PL', 'ERP', 'FDI'], correct: 1 }
+        ],
+        glossary: [
+            { term: 'اللوجستيك', def: 'أنشطة متكاملة لتخطيط وتنفيذ ومراقبة تدفق المواد من الإنتاج للاستهلاك' },
+            { term: 'سلسلة الإمداد', def: 'شبكة تنظيمية تربط الموردين والمؤسسات والموزعين' },
+            { term: '3PL', def: 'الاستعانة بمزود خارجي لتنفيذ العمليات اللوجستية' },
+            { term: 'ERP', def: 'نظام تخطيط موارد المؤسسة المتكامل' },
+            { term: 'TMS', def: 'نظام إدارة النقل والشحن' },
+            { term: 'WMS', def: 'نظام إدارة المستودعات' },
+            { term: 'قاعدة اللاءات', def: 'صفر أخطاء، صفر مخزون، صفر تعطل في اللوجستيك' }
+        ]
+    }
+    ];
+
+    // ============ حالة التطبيق ============
+    let state = {
+        view: 'home', // home | subject
+        currentSubject: null,
+        mode: 'read', // read | flashcards | quiz | glossary
+        // البطاقات
+        cardIndex: 0,
+        cardFlipped: false,
+        cardsStudied: {},
+        // الاختبار
+        quizIndex: 0,
+        quizAnswered: false,
+        quizScore: 0,
+        quizFinished: false,
+        quizAnswers: [],
+        // القراءة
+        openSections: {},
+        readSections: {},
+        // البحث
+        searchQuery: '',
+        // الإحصائيات
+        totalCardsStudied: 0,
+        totalQuizzesTaken: 0,
+        totalCorrectAnswers: 0
+    };
+
+    // تحميل التقدم من التخزين المحلي
+    function loadProgress() {
+        try {
+            const saved = localStorage.getItem('studyProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.cardsStudied = data.cardsStudied || {};
+                state.readSections = data.readSections || {};
+                state.totalCardsStudied = data.totalCardsStudied || 0;
+                state.totalQuizzesTaken = data.totalQuizzesTaken || 0;
+                state.totalCorrectAnswers = data.totalCorrectAnswers || 0;
+            }
+        } catch(e) {}
+    }
+
+    function saveProgress() {
+        try {
+            localStorage.setItem('studyProgress', JSON.stringify({
+                cardsStudied: state.cardsStudied,
+                readSections: state.readSections,
+                totalCardsStudied: state.totalCardsStudied,
+                totalQuizzesTaken: state.totalQuizzesTaken,
+                totalCorrectAnswers: state.totalCorrectAnswers
+            }));
+        } catch(e) {}
+    }
+
+    // ============ دوال العرض ============
+    const app = document.getElementById('app');
+
+    function render() {
+        if (state.view === 'home') renderHome();
+        else if (state.view === 'subject') renderSubject();
+    }
+
+    function renderHome() {
+        const totalFlashcards = subjects.reduce((s, sub) => s + sub.flashcards.length, 0);
+        const totalRead = Object.keys(state.readSections).length;
+        const totalSections = subjects.reduce((s, sub) => s + sub.sections.length, 0);
+        const readPercent = totalSections > 0 ? Math.round((totalRead / totalSections) * 100) : 0;
+
+        app.innerHTML = `
+        <div class="fade-in" style="max-width:1100px;margin:0 auto;padding:40px 20px 80px;">
+            <header style="text-align:center;margin-bottom:50px;">
+                <div style="display:inline-flex;align-items:center;gap:14px;margin-bottom:16px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-graduation-cap" style="font-size:22px;color:var(--accent);"></i>
+                    </div>
+                    <h1 style="font-size:clamp(28px,5vw,42px);font-weight:900;letter-spacing:-0.5px;">منصة المراجعة الذكية</h1>
+                </div>
+                <p style="color:var(--text-muted);font-size:17px;max-width:600px;margin:0 auto;line-height:1.8;">ادرس، ذاكر، واختبر نفسك في خمس مقررات جامعية بطرق تفاعلية تساعدك على الفهم السريع والحفظ المتين</p>
+            </header>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:48px;">
+                <div class="stat-card">
+                    <div style="font-size:28px;font-weight:900;color:var(--accent);margin-bottom:4px;">${readPercent}%</div>
+                    <div style="font-size:13px;color:var(--text-muted);">نسبة القراءة</div>
+                </div>
+                <div class="stat-card">
+                    <div style="font-size:28px;font-weight:900;color:var(--success);margin-bottom:4px;">${state.totalCardsStudied}</div>
+                    <div style="font-size:13px;color:var(--text-muted);">بطاقات مُراجعة</div>
+                </div>
+                <div class="stat-card">
+                    <div style="font-size:28px;font-weight:900;color:#F97066;margin-bottom:4px;">${state.totalQuizzesTaken}</div>
+                    <div style="font-size:13px;color:var(--text-muted);">اختبار مُنجز</div>
+                </div>
+                <div class="stat-card">
+                    <div style="font-size:28px;font-weight:900;color:#60A5FA;margin-bottom:4px;">${totalFlashcards}</div>
+                    <div style="font-size:13px;color:var(--text-muted);">بطاقة إجمالي</div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">
+                ${subjects.map(sub => {
+                    const readCount = sub.sections.filter(s => state.readSections[sub.id + '_' + s.title]).length;
+                    const readPct = Math.round((readCount / sub.sections.length) * 100);
+                    const cardsCount = sub.flashcards.length;
+                    const studiedCount = sub.flashcards.filter((_, i) => state.cardsStudied[sub.id + '_' + i]).length;
+                    return `
+                    <div class="subject-card" style="--card-color:${sub.color};--card-color-dim:${sub.colorDim};" onclick="openSubject('${sub.id}')">
+                        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                            <div style="width:46px;height:46px;border-radius:12px;background:${sub.colorDim};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fa-solid ${sub.icon}" style="font-size:20px;color:${sub.color};"></i>
+                            </div>
+                            <div>
+                                <h2 style="font-size:17px;font-weight:800;line-height:1.4;">${sub.title}</h2>
+                            </div>
+                        </div>
+                        <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:18px;">${sub.desc}</p>
+                        <div style="display:flex;gap:20px;font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+                            <span><i class="fa-solid fa-book-open" style="margin-left:5px;color:${sub.color};"></i>${sub.sections.length} أقسام</span>
+                            <span><i class="fa-solid fa-clone" style="margin-left:5px;color:${sub.color};"></i>${cardsCount} بطاقة</span>
+                            <span><i class="fa-solid fa-circle-question" style="margin-left:5px;color:${sub.color};"></i>${sub.quiz.length} سؤال</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;">
+                                <div style="width:${readPct}%;height:100%;background:${sub.color};border-radius:3px;transition:width 0.5s;"></div>
+                            </div>
+                            <span style="font-size:12px;color:${sub.color};font-weight:700;min-width:36px;text-align:left;">${readPct}%</span>
+                        </div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">${studiedCount}/${cardsCount} بطاقة مُراجعة</div>
+                    </div>`;
+                }).join('')}
+            </div>
+
+            <footer style="text-align:center;margin-top:60px;color:var(--text-muted);font-size:13px;">
+                <p>جميع البيانات محفوظة محلياً في متصفحك - لا تحتاج لحساب</p>
+            </footer>
+        </div>`;
+    }
+
+    function openSubject(id) {
+        state.currentSubject = subjects.find(s => s.id === id);
+        state.view = 'subject';
+        state.mode = 'read';
+        state.cardIndex = 0;
+        state.cardFlipped = false;
+        state.quizIndex = 0;
+        state.quizAnswered = false;
+        state.quizScore = 0;
+        state.quizFinished = false;
+        state.quizAnswers = [];
+        state.searchQuery = '';
+        render();
+        window.scrollTo(0, 0);
+    }
+
+    function renderSubject() {
+        const sub = state.currentSubject;
+        if (!sub) return;
+        app.innerHTML = `
+        <div class="fade-in" style="max-width:960px;margin:0 auto;padding:24px 20px 80px;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px;">
+                <button onclick="goHome()" style="width:42px;height:42px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;font-size:16px;" onmouseover="this.style.borderColor='${sub.color}';this.style.color='${sub.color}'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'" aria-label="الرجوع">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+                    <div style="width:40px;height:40px;border-radius:10px;background:${sub.colorDim};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fa-solid ${sub.icon}" style="font-size:18px;color:${sub.color};"></i>
+                    </div>
+                    <h1 style="font-size:clamp(18px,3vw,24px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub.title}</h1>
+                </div>
+            </div>
+
+            <div class="mode-tabs-wrap" style="display:flex;gap:8px;margin-bottom:28px;overflow-x:auto;padding-bottom:4px;">
+                <button class="mode-tab ${state.mode==='read'?'active':''}" onclick="switchMode('read')">
+                    <i class="fa-solid fa-book-open" style="margin-left:6px;"></i>القراءة
+                </button>
+                <button class="mode-tab ${state.mode==='flashcards'?'active':''}" onclick="switchMode('flashcards')">
+                    <i class="fa-solid fa-clone" style="margin-left:6px;"></i>بطاقات تعليمية
+                </button>
+                <button class="mode-tab ${state.mode==='quiz'?'active':''}" onclick="switchMode('quiz')">
+                    <i class="fa-solid fa-circle-check" style="margin-left:6px;"></i>اختبار
+                </button>
+                <button class="mode-tab ${state.mode==='glossary'?'active':''}" onclick="switchMode('glossary')">
+                    <i class="fa-solid fa-list" style="margin-left:6px;"></i>مصطلحات
+                </button>
+            </div>
+
+            <div id="mode-content"></div>
+        </div>`;
+        renderMode();
+    }
+
+    function switchMode(mode) {
+        state.mode = mode;
+        state.cardIndex = 0;
+        state.cardFlipped = false;
+        state.quizIndex = 0;
+        state.quizAnswered = false;
+        state.quizScore = 0;
+        state.quizFinished = false;
+        state.quizAnswers = [];
+        state.searchQuery = '';
+        renderSubject();
+    }
+
+    function goHome() {
+        state.view = 'home';
+        state.currentSubject = null;
+        render();
+        window.scrollTo(0, 0);
+    }
+
+    function renderMode() {
+        const container = document.getElementById('mode-content');
+        if (!container) return;
+        if (state.mode === 'read') renderReadMode(container);
+        else if (state.mode === 'flashcards') renderFlashcardMode(container);
+        else if (state.mode === 'quiz') renderQuizMode(container);
+        else if (state.mode === 'glossary') renderGlossaryMode(container);
+    }
+
+    // ============ وضع القراءة ============
+    function renderReadMode(container) {
+        const sub = state.currentSubject;
+        container.innerHTML = `
+        <div class="fade-in">
+            ${sub.sections.map((sec, i) => {
+                const key = sub.id + '_' + sec.title;
+                const isOpen = state.openSections[key];
+                const isRead = state.readSections[key];
+                return `
+                <div class="accordion-item ${isOpen ? 'open' : ''}" id="acc-${i}">
+                    <div class="accordion-header" onclick="toggleSection(${i})">
+                        <div style="width:32px;height:32px;border-radius:8px;background:${sub.colorDim};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span style="font-size:14px;font-weight:800;color:${sub.color};">${i+1}</span>
+                        </div>
+                        <span style="font-weight:700;font-size:16px;flex:1;">${sec.title}</span>
+                        <button class="section-read-btn ${isRead?'read':''}" onclick="event.stopPropagation();markRead('${key}',this)" title="${isRead?'تمت القراءة':'علّم كمقروء'}">
+                            <i class="fa-solid ${isRead?'fa-check':'fa-bookmark'}" style="margin-left:4px;font-size:11px;"></i>
+                            ${isRead?'تمت':'علّم'}
+                        </button>
+                        <i class="fa-solid fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            ${sec.points.map(p => `<div class="sub-point" style="margin-bottom:12px;">${p}</div>`).join('')}
+                            ${sec.extra ? `<div style="margin-top:16px;padding:16px;background:var(--bg);border-radius:10px;border-right:3px solid ${sub.color};line-height:2;">${sec.extra}</div>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>`;
+    }
+
+    function toggleSection(i) {
+        const sub = state.currentSubject;
+        const key = sub.id + '_' + sub.sections[i].title;
+        state.openSections[key] = !state.openSections[key];
+        const el = document.getElementById('acc-' + i);
+        if (el) el.classList.toggle('open');
+    }
+
+    function markRead(key, btn) {
+        state.readSections[key] = !state.readSections[key];
+        if (state.readSections[key]) {
+            btn.classList.add('read');
+            btn.innerHTML = '<i class="fa-solid fa-check" style="margin-left:4px;font-size:11px;"></i>تمت';
+            showToast('تم تسجيل القسم كمقروء', 'success');
+        } else {
+            btn.classList.remove('read');
+            btn.innerHTML = '<i class="fa-solid fa-bookmark" style="margin-left:4px;font-size:11px;"></i>علّم';
+        }
+        saveProgress();
+    }
+
+    // ============ وضع البطاقات ============
+    function renderFlashcardMode(container) {
+        const sub = state.currentSubject;
+        const total = sub.flashcards.length;
+        const idx = state.cardIndex;
+        const card = sub.flashcards[idx];
+        const studied = sub.flashcards.filter((_, i) => state.cardsStudied[sub.id + '_' + i]).length;
+
+        container.innerHTML = `
+        <div class="fade-in" style="text-align:center;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:14px;color:var(--text-muted);">
+                <span>البطاقة ${idx + 1} من ${total}</span>
+                <span>${studied}/${total} مُراجعة</span>
+            </div>
+            <div style="height:6px;background:var(--bg2);border-radius:3px;margin-bottom:32px;overflow:hidden;">
+                <div style="width:${((idx+1)/total)*100}%;height:100%;background:${sub.color};border-radius:3px;transition:width 0.4s;"></div>
+            </div>
+
+            <div class="flashcard-container" onclick="flipCard()">
+                <div class="flashcard-inner ${state.cardFlipped?'flipped':''}" id="fc-inner">
+                    <div class="flashcard-front">
+                        <div style="font-size:13px;color:${sub.color};font-weight:700;margin-bottom:20px;letter-spacing:1px;">
+                            <i class="fa-solid fa-question-circle" style="margin-left:6px;"></i>سؤال
+                        </div>
+                        <div style="font-size:20px;font-weight:700;line-height:1.8;">${card.q}</div>
+                        <div style="margin-top:24px;font-size:13px;color:var(--text-muted);">اضغط للاطلاع على الإجابة</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div style="font-size:13px;color:${sub.color};font-weight:700;margin-bottom:20px;letter-spacing:1px;">
+                            <i class="fa-solid fa-lightbulb" style="margin-left:6px;"></i>إجابة
+                        </div>
+                        <div style="font-size:17px;font-weight:500;line-height:2;text-align:right;width:100%;">${card.a}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:center;gap:12px;margin-top:32px;">
+                ${state.cardFlipped ? `
+                    <button class="confidence-btn conf-btn-hard" onclick="rateCard('hard')">
+                        <i class="fa-solid fa-xmark" style="margin-left:6px;"></i>صعب
+                    </button>
+                    <button class="confidence-btn conf-btn-medium" onclick="rateCard('medium')">
+                        <i class="fa-solid fa-minus" style="margin-left:6px;"></i>متوسط
+                    </button>
+                    <button class="confidence-btn conf-btn-easy" onclick="rateCard('easy')">
+                        <i class="fa-solid fa-check" style="margin-left:6px;"></i>جيد
+                    </button>
+                ` : `
+                    <button class="confidence-btn" style="color:var(--text-muted);border-color:var(--border);background:var(--card);" onclick="skipCard()">
+                        تخطي <i class="fa-solid fa-forward" style="margin-right:6px;"></i>
+                    </button>
+                `}
+            </div>
+
+            <div style="display:flex;justify-content:center;gap:8px;margin-top:24px;">
+                ${sub.flashcards.map((_, i) => `
+                    <div style="width:${i===idx?'24px':'8px'};height:8px;border-radius:4px;background:${i===idx?sub.color:state.cardsStudied[sub.id+'_'+i]?'rgba(52,211,153,0.5)':'var(--border)'};transition:all 0.3s;cursor:pointer;" onclick="goToCard(${i})"></div>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+
+    function flipCard() {
+        state.cardFlipped = !state.cardFlipped;
+        const inner = document.getElementById('fc-inner');
+        if (inner) inner.classList.toggle('flipped');
+        if (state.cardFlipped) renderFlashcardMode(document.getElementById('mode-content'));
+    }
+
+    function rateCard(rating) {
+        const sub = state.currentSubject;
+        const key = sub.id + '_' + state.cardIndex;
+        if (!state.cardsStudied[key]) {
+            state.cardsStudied[key] = true;
+            state.totalCardsStudied++;
+        }
+        saveProgress();
+        nextCard();
+    }
+
+    function skipCard() {
+        nextCard();
+    }
+
+    function goToCard(i) {
+        state.cardIndex = i;
+        state.cardFlipped = false;
+        renderFlashcardMode(document.getElementById('mode-content'));
+    }
+
+    function nextCard() {
+        const sub = state.currentSubject;
+        if (state.cardIndex < sub.flashcards.length - 1) {
+            state.cardIndex++;
+            state.cardFlipped = false;
+            renderFlashcardMode(document.getElementById('mode-content'));
+        } else {
+            showToast('أحسنت! لقد أنهيت جميع البطاقات', 'success');
+            state.cardIndex = 0;
+            state.cardFlipped = false;
+            renderFlashcardMode(document.getElementById('mode-content'));
+        }
+    }
+
+    // ============ وضع الاختبار ============
+    function renderQuizMode(container) {
+        const sub = state.currentSubject;
+        if (state.quizFinished) {
+            renderQuizResults(container, sub);
+            return;
+        }
+        const total = sub.quiz.length;
+        const idx = state.quizIndex;
+        const q = sub.quiz[idx];
+        const letters = ['أ', 'ب', 'ج', 'د'];
+
+        container.innerHTML = `
+        <div class="fade-in" style="max-width:700px;margin:0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:14px;color:var(--text-muted);">
+                <span>السؤال ${idx + 1} من ${total}</span>
+                <span>النتيجة: ${state.quizScore}/${total}</span>
+            </div>
+            <div style="height:6px;background:var(--bg2);border-radius:3px;margin-bottom:36px;overflow:hidden;">
+                <div style="width:${((idx+1)/total)*100}%;height:100%;background:${sub.color};border-radius:3px;transition:width 0.4s;"></div>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;margin-bottom:28px;">
+                <h3 style="font-size:19px;font-weight:700;line-height:1.8;">${q.q}</h3>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px;" id="quiz-options">
+                ${q.opts.map((opt, i) => `
+                    <button class="quiz-option" onclick="answerQuiz(${i})" id="opt-${i}">
+                        <span class="opt-letter">${letters[i]}</span>
+                        <span>${opt}</span>
+                    </button>
+                `).join('')}
+            </div>
+
+            ${state.quizAnswered ? `
+                <div style="text-align:center;margin-top:28px;">
+                    <button onclick="nextQuestion()" style="padding:14px 40px;border-radius:12px;background:${sub.color};color:var(--bg);font-weight:700;font-size:16px;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;transition:all 0.3s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                        ${idx < total - 1 ? 'السؤال التالي' : 'عرض النتائج'}
+                        <i class="fa-solid fa-arrow-left" style="margin-right:8px;"></i>
+                    </button>
+                </div>
+            ` : ''}
+        </div>`;
+    }
+
+    function answerQuiz(selected) {
+        if (state.quizAnswered) return;
+        state.quizAnswered = true;
+        const sub = state.currentSubject;
+        const q = sub.quiz[state.quizIndex];
+        const isCorrect = selected === q.correct;
+
+        if (isCorrect) {
+            state.quizScore++;
+            state.totalCorrectAnswers++;
+        }
+
+        state.quizAnswers.push({ question: state.quizIndex, selected, correct: q.correct, isCorrect });
+
+        // تحديث أزرار الخيارات
+        q.opts.forEach((_, i) => {
+            const btn = document.getElementById('opt-' + i);
+            if (!btn) return;
+            btn.classList.add('disabled');
+            if (i === q.correct) btn.classList.add('correct');
+            if (i === selected && !isCorrect) btn.classList.add('wrong');
+        });
+
+        // إعادة عرض لزر التالي
+        renderQuizMode(document.getElementById('mode-content'));
+    }
+
+    function nextQuestion() {
+        const sub = state.currentSubject;
+        if (state.quizIndex < sub.quiz.length - 1) {
+            state.quizIndex++;
+            state.quizAnswered = false;
+            renderQuizMode(document.getElementById('mode-content'));
+        } else {
+            state.quizFinished = true;
+            state.totalQuizzesTaken++;
+            saveProgress();
+            renderQuizMode(document.getElementById('mode-content'));
+        }
+    }
+
+    function renderQuizResults(container, sub) {
+        const total = sub.quiz.length;
+        const score = state.quizScore;
+        const pct = Math.round((score / total) * 100);
+        const circumference = 2 * Math.PI * 54;
+        const offset = circumference - (pct / 100) * circumference;
+        const color = pct >= 80 ? 'var(--success)' : pct >= 50 ? '#FBBF24' : 'var(--error)';
+        const msg = pct >= 80 ? 'ممتاز! أداء رائع' : pct >= 50 ? 'جيد، واصل المراجعة' : 'تحتاج لمزيد من المراجعة';
+
+        container.innerHTML = `
+        <div class="fade-in" style="text-align:center;max-width:500px;margin:0 auto;">
+            <div style="position:relative;width:140px;height:140px;margin:0 auto 28px;">
+                <svg width="140" height="140" viewBox="0 0 120 120" style="transform:rotate(-90deg);">
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border)" stroke-width="8"/>
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="${color}" stroke-width="8"
+                        stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}"
+                        stroke-linecap="round" class="progress-ring" id="progress-ring"/>
+                </svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <span style="font-size:36px;font-weight:900;color:${color};">${pct}%</span>
+                    <span style="font-size:12px;color:var(--text-muted);">${score}/${total}</span>
+                </div>
+            </div>
+            <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;color:${color};">${msg}</h2>
+            <p style="color:var(--text-muted);margin-bottom:32px;font-size:15px;">أجبت على ${score} من ${total} أسئلة بشكل صحيح</p>
+
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;text-align:right;">
+                ${state.quizAnswers.map((a, i) => {
+                    const q = sub.quiz[a.question];
+                    return `
+                    <div style="background:var(--card);border:1px solid ${a.isCorrect?'rgba(52,211,153,0.3)':'rgba(248,113,113,0.3)'};border-radius:10px;padding:14px 16px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <i class="fa-solid ${a.isCorrect?'fa-circle-check':'fa-circle-xmark'}" style="color:${a.isCorrect?'var(--success)':'var(--error)'};"></i>
+                            <span style="font-size:14px;font-weight:600;">${q.q}</span>
+                        </div>
+                        ${!a.isCorrect ? `<div style="font-size:13px;color:var(--text-muted);margin-right:26px;">الإجابة الصحيحة: <span style="color:var(--success);font-weight:600;">${q.opts[a.correct]}</span></div>` : ''}
+                    </div>`;
+                }).join('')}
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button onclick="retryQuiz()" style="padding:14px 32px;border-radius:12px;background:${sub.color};color:var(--bg);font-weight:700;font-size:15px;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;transition:all 0.3s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                    <i class="fa-solid fa-rotate-right" style="margin-left:6px;"></i>إعادة الاختبار
+                </button>
+                <button onclick="switchMode('flashcards')" style="padding:14px 32px;border-radius:12px;background:var(--card);color:var(--text);font-weight:700;font-size:15px;border:1px solid var(--border);cursor:pointer;font-family:'Tajawal',sans-serif;transition:all 0.3s;" onmouseover="this.style.borderColor='${sub.color}'" onmouseout="this.style.borderColor='var(--border)'">
+                    <i class="fa-solid fa-clone" style="margin-left:6px;"></i>مراجعة البطاقات
+                </button>
+            </div>
+        </div>`;
+
+        // تحريك الحلقة
+        requestAnimationFrame(() => {
+            const ring = document.getElementById('progress-ring');
+            if (ring) ring.style.strokeDashoffset = offset;
+        });
+    }
+
+    function retryQuiz() {
+        state.quizIndex = 0;
+        state.quizAnswered = false;
+        state.quizScore = 0;
+        state.quizFinished = false;
+        state.quizAnswers = [];
+        renderQuizMode(document.getElementById('mode-content'));
+    }
+
+    // ============ وضع المصطلحات ============
+    function renderGlossaryMode(container) {
+        const sub = state.currentSubject;
+        const query = state.searchQuery.toLowerCase();
+        const filtered = query
+            ? sub.glossary.filter(g => g.term.includes(query) || g.def.includes(query))
+            : sub.glossary;
+
+        container.innerHTML = `
+        <div class="fade-in">
+            <div style="position:relative;margin-bottom:24px;">
+                <i class="fa-solid fa-search" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:14px;"></i>
+                <input type="text" class="search-input" placeholder="ابحث في المصطلحات..." value="${state.searchQuery}" oninput="searchGlossary(this.value)" />
+            </div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">${filtered.length} مصطلح</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                ${filtered.map(g => `
+                    <div class="glossary-item">
+                        <div style="font-weight:700;font-size:16px;color:${sub.color};margin-bottom:6px;">${highlightSearch(g.term, query)}</div>
+                        <div style="font-size:14px;color:#b8b0a4;line-height:1.8;">${highlightSearch(g.def, query)}</div>
+                    </div>
+                `).join('')}
+                ${filtered.length === 0 ? `<div style="text-align:center;padding:40px;color:var(--text-muted);">لا توجد نتائج مطابقة</div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    function searchGlossary(val) {
+        state.searchQuery = val;
+        renderGlossaryMode(document.getElementById('mode-content'));
+    }
+
+    function highlightSearch(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<mark style="background:var(--accent-dim);color:var(--accent);padding:0 2px;border-radius:2px;">$1</mark>');
+    }
+
+    // ============ الإشعارات ============
+    function showToast(msg, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.className = `toast toast-${type} show`;
+        toast.textContent = msg;
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
+    }
+
+    // ============ اختصارات لوحة المفاتيح ============
+    document.addEventListener('keydown', (e) => {
+        if (state.view !== 'subject') return;
+        if (state.mode === 'flashcards') {
+            if (e.code === 'Space') { e.preventDefault(); flipCard(); }
+            else if (e.code === 'ArrowLeft' && state.cardFlipped) rateCard('hard');
+            else if (e.code === 'ArrowDown' && state.cardFlipped) rateCard('medium');
+            else if (e.code === 'ArrowRight' && state.cardFlipped) rateCard('easy');
+            else if (e.code === 'ArrowLeft' && !state.cardFlipped) skipCard();
+        }
+        if (state.mode === 'quiz' && !state.quizAnswered) {
+            if (e.key === '1') answerQuiz(0);
+            else if (e.key === '2') answerQuiz(1);
+            else if (e.key === '3') answerQuiz(2);
+            else if (e.key === '4') answerQuiz(3);
+            else if (e.code === 'Enter' && state.quizAnswered) nextQuestion();
+        }
+        if (state.mode === 'quiz' && state.quizAnswered && e.code === 'Enter') {
+            nextQuestion();
+        }
+        if (e.code === 'Escape') goHome();
+    });
+
+    // ============ التهيئة ============
+    loadProgress();
+    render();
+    </script>
+</body>
+</html>
